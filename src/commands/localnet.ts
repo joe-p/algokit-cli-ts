@@ -19,18 +19,14 @@ import {
   type ComposeServiceInfo,
 } from "../core/sandbox.js";
 import { extractVersionTriple, isMinimumVersion } from "../core/utils.js";
-import { createCodespaceCommand } from "./codespace.js";
-import { exploreCommand } from "./explore.js";
 import { goalCommand } from "./goal.js";
 
 const logger = getLogger("algokit.cli.localnet");
 
 export const SERVICE_NAMES = ["algod", "conduit", "indexer-db", "indexer"] as const;
 
-/** Checks run before every localnet subcommand (other than codespace). */
+/** Checks run before every localnet subcommand. */
 async function checkContainerEngine(subcommand: string): Promise<void> {
-  if (subcommand === "codespace") return;
-
   let composeVersionResult;
   try {
     composeVersionResult = await run(composeVersionCommand());
@@ -398,17 +394,6 @@ export function createLocalnetCommand(): Command {
 
   localnet.addCommand(
     helpOption(
-      new Command("explore")
-        .summary("Explore the AlgoKit LocalNet using lora.")
-        .description("Explore the AlgoKit LocalNet using lora.")
-        .action(async () => {
-          await exploreCommand("localnet");
-        }),
-    ),
-  );
-
-  localnet.addCommand(
-    helpOption(
       new Command("logs")
         .summary("See the output of the Docker containers.")
         .description("See the output of the Docker containers.")
@@ -419,8 +404,6 @@ export function createLocalnetCommand(): Command {
         }),
     ),
   );
-
-  localnet.addCommand(createCodespaceCommand());
 
   return localnet;
 }

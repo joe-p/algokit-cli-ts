@@ -3,7 +3,6 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { getExploreUrl } from "../src/commands/explore.js";
 import { ComposeFileStatus, ComposeSandbox, getAlgodNetworkTemplate } from "../src/core/sandbox.js";
 import { extractVersionTriple, isMinimumVersion } from "../src/core/utils.js";
 import { sandboxDir, writeLatestCompose } from "./support/fixtures.js";
@@ -47,22 +46,6 @@ describe("compose file status", () => {
     expect(new ComposeSandbox().composeFileStatus()).toBe(ComposeFileStatus.OUT_OF_DATE);
     writeFileSync(templatePath, "{not json");
     expect(new ComposeSandbox().composeFileStatus()).toBe(ComposeFileStatus.OUT_OF_DATE);
-  });
-});
-
-describe("explore url", () => {
-  it("uses the plain url for local localnet", () => {
-    expect(getExploreUrl("localnet")).toBe("https://explore.algokit.io/localnet");
-    expect(getExploreUrl("testnet")).toBe("https://explore.algokit.io/testnet");
-  });
-
-  it("passes codespace endpoints as query params", () => {
-    process.env.CODESPACE_NAME = "my-cs";
-    expect(getExploreUrl("localnet")).toBe(
-      "https://explore.algokit.io/localnet?algod_url=https%3A%2F%2Fmy-cs-4001.app.github.dev" +
-        "&indexer_url=https%3A%2F%2Fmy-cs-8980.app.github.dev&algod_port=443&indexer_port=443" +
-        "&kmd_port=443&kmd_url=https%3A%2F%2Fmy-cs-4002.app.github.dev",
-    );
   });
 });
 

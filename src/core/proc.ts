@@ -1,7 +1,7 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { constants } from "node:os";
 
-import { CliError, CommandNotFoundError, ProcessTimeoutError } from "./errors.js";
+import { CliError, CommandNotFoundError } from "./errors.js";
 import { getLogger, style, type LogLevel } from "./log.js";
 
 const logger = getLogger("algokit.core.proc");
@@ -10,11 +10,6 @@ export interface RunResult {
   command: string;
   exitCode: number;
   output: string;
-}
-
-export interface InteractiveRunResult extends RunResult {
-  /** true if the user pressed Ctrl+C (SIGINT) while the process was running */
-  interrupted: boolean;
 }
 
 export interface RunOptions {
@@ -105,8 +100,6 @@ export interface RunInteractiveOptions {
   cwd?: string;
   env?: NodeJS.ProcessEnv;
   badReturnCodeErrorMessage?: string;
-  /** Maximum runtime in seconds, after which the process is killed and a ProcessTimeoutError is thrown */
-  timeout?: number;
 }
 
 /**
@@ -116,8 +109,8 @@ export interface RunInteractiveOptions {
 export async function runInteractive(
   command: string[],
   options: RunInteractiveOptions = {},
-): Promise<InteractiveRunResult> {
-  const { cwd, env, badReturnCodeErrorMessage, timeout } = options;
+): Promise<RunResult> {
+  const { cwd, env, badReturnCodeErrorMessage } = options;
   const commandStr = command.join(" ");
   logger.debug(`Running '${commandStr}' in '${cwd ?? process.cwd()}'`);
 
@@ -125,28 +118,16 @@ export async function runInteractive(
   if (!file) throw new CommandNotFoundError(commandStr);
 
   // Like a shell, let the foreground child process handle Ctrl+C rather than exiting ourselves
-  let interrupted = false;
-  const onSigint = () => {
-    interrupted = true;
-  };
+  const onSigint = () => {};
   process.on("SIGINT", onSigint);
 
-  let timer: NodeJS.Timeout | undefined;
-  let timedOut = false;
   try {
     const child = spawn(file, args, { cwd, env: env ?? process.env, stdio: "inherit" });
     const closed = new Promise<[number | null, NodeJS.Signals | null]>((resolve) =>
       child.once("close", (code, signal) => resolve([code, signal])),
     );
     await waitForSpawn(child, file);
-    if (timeout !== undefined) {
-      timer = setTimeout(() => {
-        timedOut = true;
-        child.kill();
-      }, timeout * 1000);
-    }
     const exitCode = exitCodeOf(...(await closed));
-    if (timedOut) throw new ProcessTimeoutError(commandStr, timeout ?? 0);
 
     if (exitCode === 0) {
       logger.debug(`'${commandStr}' completed successfully`, { excludeFrom: "console" });
@@ -154,9 +135,8 @@ export async function runInteractive(
       logger.debug(`'${commandStr}' failed, exited with code = ${exitCode}`, { excludeFrom: "console" });
       if (badReturnCodeErrorMessage) throw new CliError(badReturnCodeErrorMessage);
     }
-    return { command: commandStr, exitCode, output: "", interrupted };
+    return { command: commandStr, exitCode, output: "" };
   } finally {
-    if (timer) clearTimeout(timer);
     process.off("SIGINT", onSigint);
   }
 }

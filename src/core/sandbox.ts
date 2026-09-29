@@ -245,7 +245,7 @@ export class ComposeSandbox {
     });
     logger.debug("AlgoKit LocalNet started, waiting for health check");
     if ((await waitForAlgod()) && (await waitForIndexer())) {
-      logger.info("Started; execute `algokit explore` to explore LocalNet in a web user interface.");
+      logger.info("Started; execute `algokit goal` or `algokit localnet console` to interact with LocalNet.");
     } else {
       logger.warning("AlgoKit LocalNet failed to return a successful health check");
     }

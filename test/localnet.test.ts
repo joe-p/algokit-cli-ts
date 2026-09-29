@@ -75,14 +75,6 @@ describe("localnet group checks", () => {
     expect(readFileSync(path.join(appConfigDir(), "active-container-engine"), "utf-8")).toBe("podman");
   });
 
-  it("codespace skips the container checks entirely", async () => {
-    procMock.shouldRaiseNotFound("docker");
-    procMock.shouldRaiseNotFound("gh");
-    httpMock.addException("https://webi.sh/gh");
-    const result = await invoke("localnet codespace");
-    expect(commands()).not.toContain("docker compose version --format json");
-    expect(result.output).toContain("Failed to automatically install gh cli");
-  });
 });
 
 describe("localnet start", () => {
@@ -529,7 +521,7 @@ describe("localnet config", () => {
   });
 });
 
-describe("localnet logs / console / explore", () => {
+describe("localnet logs / console", () => {
   it("runs compose logs interactively", async () => {
     const result = await invoke("localnet logs --follow --tail 10");
     expect(result.exitCode).toBe(0);
@@ -565,9 +557,4 @@ describe("localnet logs / console / explore", () => {
     ]);
   });
 
-  it("opens the explorer", async () => {
-    const result = await invoke("localnet explore");
-    expect(result.exitCode).toBe(0);
-    expect(result.output).toContain("Opening localnet explorer in your default browser\nURL: https://explore.algokit.io/localnet");
-  });
 });

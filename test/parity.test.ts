@@ -24,7 +24,14 @@ import { appConfigDir, invoke } from "./support/invoke.js";
 import { procMock } from "./support/proc-mock.js";
 
 function pythonFixture(name: string): string {
-  return readFileSync(path.join(import.meta.dirname, "fixtures", "python", name), "utf-8");
+  return (
+    readFileSync(path.join(import.meta.dirname, "fixtures", "python", name), "utf-8")
+      // intentional difference: `explore` isn't part of this CLI
+      .replaceAll(
+        "Started; execute `algokit explore` to explore LocalNet in a web user interface.",
+        "Started; execute `algokit goal` or `algokit localnet console` to interact with LocalNet.",
+      )
+  );
 }
 
 /**

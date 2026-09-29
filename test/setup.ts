@@ -26,8 +26,6 @@ beforeEach(async () => {
   process.env.XDG_STATE_HOME = stateHome;
   delete process.env.NO_COLOR;
   delete process.env.ALGOKIT_LOCALNET_CONFIG_DIR;
-  delete process.env.GITPOD_WORKSPACE_URL;
-  delete process.env.CODESPACE_NAME;
 
   procMock.reset();
   httpMock.reset();
@@ -37,9 +35,6 @@ beforeEach(async () => {
   healthCheckTimings.algodWait = 0.1;
   healthCheckTimings.indexerWait = 0.1;
   healthCheckTimings.healthTimeout = 0.05;
-
-  const { resetGithubCliAuthenticationCache } = await import("../src/core/codespace.js");
-  resetGithubCliAuthenticationCache();
 });
 
 afterEach(() => {

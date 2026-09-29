@@ -27,10 +27,3 @@ export async function httpGet(
   };
 }
 
-/** Fetch the text body of a URL, throwing if the response isn't successful. */
-export async function httpGetText(url: string): Promise<string> {
-  const response = await fetch(url, { signal: AbortSignal.timeout(DEFAULT_TIMEOUT_SECONDS * 1000) });
-  logger.info(`HTTP Request: GET ${url} "HTTP/1.1 ${response.status} ${response.statusText}"`);
-  if (!response.ok) throw new Error(`HTTP ${response.status} fetching ${url}`);
-  return response.text();
-}

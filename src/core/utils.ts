@@ -1,4 +1,3 @@
-import { release } from "node:os";
 import { setTimeout as sleep } from "node:timers/promises";
 
 export function extractVersionTriple(versionStr: string): string {
@@ -25,36 +24,6 @@ export function isMinimumVersion(systemVersion: string, minimumVersion: string):
     if (s !== m) return s > m;
   }
   return true;
-}
-
-export function isWindows(): boolean {
-  return process.platform === "win32";
-}
-
-/** Detects if running in WSL (https://github.com/scivision/detect-windows-subsystem-for-linux) */
-export function isWsl(): boolean {
-  const osRelease = release();
-  return osRelease.endsWith("-Microsoft") || osRelease.endsWith("microsoft-standard-WSL2");
-}
-
-const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
-const CLEAR_LINE = "\x1b[K";
-
-/** Executes a function while displaying an animated spinner in the console. */
-export async function runWithAnimation<T>(target: () => Promise<T>, animationText = "Loading"): Promise<T> {
-  let frame = 0;
-  const render = () => {
-    process.stdout.write(`\r${SPINNER_FRAMES[frame % SPINNER_FRAMES.length]} ${animationText}`);
-    frame++;
-  };
-  render();
-  const interval = setInterval(render, 100);
-  try {
-    return await target();
-  } finally {
-    clearInterval(interval);
-    process.stdout.write(`\r${CLEAR_LINE}`);
-  }
 }
 
 export function sleepSeconds(seconds: number): Promise<void> {

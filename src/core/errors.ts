@@ -26,21 +26,3 @@ export class CommandNotFoundError extends Error {
   }
 }
 
-/** Raised when a process exceeds its allotted runtime (equivalent to subprocess.TimeoutExpired). */
-export class ProcessTimeoutError extends Error {
-  constructor(
-    readonly command: string,
-    readonly timeoutSeconds: number,
-  ) {
-    super(`Command '${command}' timed out after ${timeoutSeconds} seconds`);
-    this.name = "ProcessTimeoutError";
-  }
-}
-
-/** Raised when the user interrupts (Ctrl+C) a long running operation (equivalent to KeyboardInterrupt). */
-export class KeyboardInterruptError extends Error {
-  constructor() {
-    super("Keyboard interrupt");
-    this.name = "KeyboardInterruptError";
-  }
-}
