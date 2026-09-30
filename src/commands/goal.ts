@@ -84,7 +84,7 @@ export async function goalCommand(goalArgs: string[], options: GoalOptions): Pro
       result = await runInteractive(cmd);
     } else {
       // Try non-interactive first, fallback to interactive if it fails with input-related error
-      result = await run(cmd, { stdoutLogLevel: "info", prefixProcess: false, passStdin: true });
+      result = await run(cmd, { passthrough: true, passStdin: true });
       if (result.exitCode !== 0 && result.output.includes("inappropriate ioctl")) {
         // Fallback to interactive mode if we detect TTY-related errors
         logger.debug("Command failed with TTY error, retrying in interactive mode");

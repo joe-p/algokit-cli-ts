@@ -1,7 +1,5 @@
 import { createInterface } from "node:readline";
 
-import selectPrompt from "@inquirer/select";
-
 import { CliError } from "./errors.js";
 
 let lineReader: ReturnType<typeof createInterface> | undefined;
@@ -62,12 +60,3 @@ export async function confirm(message: string, options: { default?: boolean } = 
   }
 }
 
-/** Prompt to select one of several choices (equivalent to questionary.select); returns undefined if cancelled. */
-export async function select(message: string, choices: string[]): Promise<string | undefined> {
-  try {
-    return await selectPrompt({ message, choices: choices.map((value) => ({ value })) });
-  } catch (err) {
-    if (err instanceof Error && err.name === "ExitPromptError") return undefined;
-    throw err;
-  }
-}

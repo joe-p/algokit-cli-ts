@@ -16,7 +16,7 @@ node dist/index.js --help        # or `npm link` to get an `algokit` binary
 algokit [-v] [--color/--no-color] <command>
 
   goal [--console] [--interactive] [GOAL_ARGS...]
-  localnet config [docker|podman] [-f]
+  localnet config <docker|podman> [-f]
   localnet start [-n NAME] [-P CONFIG_DIR] [-d/--no-dev] [--force] [--check]
   localnet stop
   localnet reset [--update/--no-update] [-P CONFIG_DIR] [--check]
@@ -65,4 +65,8 @@ the Python test-suite's approval files (copied into `test/fixtures/python`).
   engine, since the latter doesn't exist here.
 - `localnet logs`: in Python, `-f` is declared as the *off* switch of `--follow/-f`. Here `-f` means `--follow`.
 - `localnet <subcommand> --help` works without a container engine. Click runs the engine checks before handling `--help`.
+- `localnet config` requires the engine argument; there is no interactive picker.
+- `goal`'s stdout and stderr are passed through unchanged. Python trims each line, adds a leading space and merges
+  stderr into stdout.
+- `HTTP Request: …` lines (health checks, Docker Hub version checks, status) are only shown with `-v`.
 - The help text layout is commander's rather than click's.

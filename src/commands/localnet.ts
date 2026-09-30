@@ -3,11 +3,11 @@ import path from "node:path";
 
 import { Argument, Command, InvalidArgumentError, Option } from "commander";
 
-import { ContainerEngine, getContainerEngine, saveContainerEngine } from "../core/container-engine.js";
+import { CONTAINER_ENGINES, getContainerEngine, saveContainerEngine } from "../core/container-engine.js";
 import { CliError, CommandNotFoundError } from "../core/errors.js";
 import { getColor, getLogger, style } from "../core/log.js";
 import { run } from "../core/proc.js";
-import { confirm, select } from "../core/prompts.js";
+import { confirm } from "../core/prompts.js";
 import {
   ComposeFileStatus,
   ComposeSandbox,
@@ -90,18 +90,7 @@ function checkOption(): Option {
   );
 }
 
-export async function configCommand(engine: string | undefined, options: { force?: boolean }): Promise<void> {
-  if (engine === undefined) {
-    const currentEngine = getContainerEngine();
-    const choices = [
-      `Docker ${currentEngine === ContainerEngine.DOCKER ? "(Active)" : ""}`.trim(),
-      `Podman ${currentEngine === ContainerEngine.PODMAN ? "(Active)" : ""}`.trim(),
-    ];
-    const selected = await select("Which container engine do you prefer?", choices);
-    if (selected === undefined) throw new CliError("No valid container engine selected. Aborting...");
-    engine = (selected.split(" ")[0] ?? "").toLowerCase();
-  }
-
+export async function configCommand(engine: string, options: { force?: boolean }): Promise<void> {
   const sandbox = await ComposeSandbox.fromEnvironment();
   const hasActiveInstance =
     sandbox !== undefined &&
@@ -299,9 +288,9 @@ export function createLocalnetCommand(): Command {
       new Command("config")
         .summary("Configure the container engine for AlgoKit LocalNet.")
         .description("Set the default container engine for use by AlgoKit CLI to run LocalNet images.")
-        .addArgument(new Argument("[engine]").choices(["docker", "podman"]))
+        .addArgument(new Argument("<engine>").choices(CONTAINER_ENGINES))
         .option("-f, --force", "Skip confirmation prompts. Defaults to 'yes' to all prompts.")
-        .action(async (engine: string | undefined, options: { force?: boolean }) => {
+        .action(async (engine: string, options: { force?: boolean }) => {
           await configCommand(engine, options);
         }),
     ),

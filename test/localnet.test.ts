@@ -20,13 +20,11 @@ import { procMock } from "./support/proc-mock.js";
 
 const prompts = vi.hoisted(() => ({
   confirm: vi.fn<(message: string, options?: { default?: boolean }) => Promise<boolean>>(),
-  select: vi.fn<(message: string, choices: string[]) => Promise<string | undefined>>(),
 }));
 vi.mock("../src/core/prompts.js", () => prompts);
 
 beforeEach(() => {
   prompts.confirm.mockReset().mockResolvedValue(true);
-  prompts.select.mockReset();
   mockComposeVersion();
 });
 
@@ -493,25 +491,22 @@ describe("localnet config", () => {
     expect(commands()).toContain("podman compose up --detach --quiet-pull");
   });
 
-  it("prompts for the engine when not provided", async () => {
-    mockNoRunningLocalnet();
-    prompts.select.mockResolvedValue("Podman");
-
+  it("requires the engine argument", async () => {
     const result = await invoke("localnet config");
-
-    expect(result.exitCode).toBe(0);
-    expect(prompts.select).toHaveBeenCalledWith("Which container engine do you prefer?", [
-      "Docker (Active)",
-      "Podman",
-    ]);
-    expect(readFileSync(path.join(appConfigDir(), "active-container-engine"), "utf-8")).toBe("podman");
+    expect(result.exitCode).toBe(2);
+    expect(result.output).toContain("error: missing required argument 'engine'");
   });
 
-  it("aborts when no engine is selected", async () => {
-    prompts.select.mockResolvedValue(undefined);
-    const result = await invoke("localnet config");
-    expect(result.exitCode).toBe(1);
-    expect(result.output).toContain("Error: No valid container engine selected. Aborting...");
+  it("switches back to docker without an active localnet", async () => {
+    writeFileSync(path.join(appConfigDir(), "active-container-engine"), "podman");
+    procMock.setOutput("podman compose version --format json", ['{"version": "1.0.6"}']);
+    procMock.setOutput("podman compose ls", ["[]"]);
+
+    const result = await invoke("localnet config docker");
+
+    expect(result.exitCode).toBe(0);
+    expect(prompts.confirm).not.toHaveBeenCalled();
+    expect(readFileSync(path.join(appConfigDir(), "active-container-engine"), "utf-8")).toBe("docker");
   });
 
   it("rejects unknown engines", async () => {

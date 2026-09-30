@@ -31,6 +31,8 @@ function pythonFixture(name: string): string {
         "Started; execute `algokit explore` to explore LocalNet in a web user interface.",
         "Started; execute `algokit goal` or `algokit localnet console` to interact with LocalNet.",
       )
+      // intentional difference: HTTP request logging is debug level only
+      .replace(/^HTTP Request:/gm, "DEBUG: HTTP Request:")
   );
 }
 
@@ -197,8 +199,9 @@ describe("command output matches Python", () => {
     expect(goalCall.command[9]).toBe("/root/goal_mount/approval.teal");
     expect(goalCall.command[11]).toBe("/root/goal_mount/approval.compiled");
     expect(readFileSync(path.join(cwd, "approval.compiled"), "utf-8")).toBe("compiled");
+    // intentional difference: goal's output is passed through unchanged, rather than trimmed and prefixed with a space
     expect(normalise(result.output.replaceAll("docker", "{container_engine}"))).toBe(
-      normalise(pythonFixture("goal_input_output_files.txt")),
+      normalise(pythonFixture("goal_input_output_files.txt").replace("\n File compiled", "\nFile compiled")),
     );
   });
 

@@ -2,7 +2,7 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { constants } from "node:os";
 
 import { CliError, CommandNotFoundError } from "./errors.js";
-import { getLogger, style, type LogLevel } from "./log.js";
+import { getLogger, style, writeStderr, writeStdout, type LogLevel } from "./log.js";
 
 const logger = getLogger("algokit.core.proc");
 
@@ -16,7 +16,11 @@ export interface RunOptions {
   cwd?: string;
   env?: NodeJS.ProcessEnv;
   badReturnCodeErrorMessage?: string;
-  prefixProcess?: boolean;
+  /**
+   * Write the process's stdout/stderr through to ours unchanged (still captured, and logged to the log file only),
+   * rather than logging each line
+   */
+  passthrough?: boolean;
   stdoutLogLevel?: LogLevel;
   passStdin?: boolean;
 }
@@ -61,7 +65,7 @@ function onLines(stream: NodeJS.ReadableStream | null, onLine: (line: string) =>
  * Equivalent to algokit.core.proc.run.
  */
 export async function run(command: string[], options: RunOptions = {}): Promise<RunResult> {
-  const { cwd, env, badReturnCodeErrorMessage, prefixProcess = true, stdoutLogLevel = "debug", passStdin } = options;
+  const { cwd, env, badReturnCodeErrorMessage, passthrough, stdoutLogLevel = "debug", passStdin } = options;
   const commandStr = command.join(" ");
   logger.debug(`Running '${commandStr}' in '${cwd ?? process.cwd()}'`);
 
@@ -79,12 +83,20 @@ export async function run(command: string[], options: RunOptions = {}): Promise<
   await waitForSpawn(child, file);
 
   const lines: string[] = [];
-  const handleLine = (line: string) => {
+  const lineHandler = (write: (text: string) => void) => (line: string) => {
     lines.push(line);
-    const prefix = prefixProcess ? style(`${file}:`, { bold: true }) : "";
-    logger.log(stdoutLogLevel, `${prefix} ${line.trim()}`);
+    const message = `${style(`${file}:`, { bold: true })} ${line.trim()}`;
+    if (passthrough) {
+      write(line);
+      logger.debug(message, { excludeFrom: "console" });
+    } else {
+      logger.log(stdoutLogLevel, message);
+    }
   };
-  await Promise.all([onLines(child.stdout, handleLine), onLines(child.stderr, handleLine)]);
+  await Promise.all([
+    onLines(child.stdout, lineHandler(writeStdout)),
+    onLines(child.stderr, lineHandler(writeStderr)),
+  ]);
   const exitCode = exitCodeOf(...(await closed));
 
   if (exitCode === 0) {

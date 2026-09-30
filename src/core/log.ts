@@ -84,6 +84,16 @@ function shouldStrip(stream: NodeJS.WriteStream): boolean {
   return !stream.isTTY;
 }
 
+/** Write text to stdout exactly as given (no newline, styling or stripping). */
+export function writeStdout(text: string): void {
+  state.stdout(text);
+}
+
+/** Write text to stderr exactly as given (no newline, styling or stripping). */
+export function writeStderr(text: string): void {
+  state.stderr(text);
+}
+
 /** Print a line to stdout (equivalent to click.echo). */
 export function echo(message: string): void {
   state.stdout(`${shouldStrip(process.stdout) ? stripVTControlCharacters(message) : message}\n`);

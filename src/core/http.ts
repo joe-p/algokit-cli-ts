@@ -10,7 +10,7 @@ export interface HttpResponse {
   json(): Promise<unknown>;
 }
 
-/** Perform a HTTP GET, logging the request in the same manner as httpx. Throws on connection errors/timeouts. */
+/** Perform a HTTP GET, logging the request (at debug level) in the same format as httpx. Throws on connection errors/timeouts. */
 export async function httpGet(
   url: string,
   options: { headers?: Record<string, string>; timeout?: number } = {},
@@ -19,7 +19,7 @@ export async function httpGet(
     headers: options.headers,
     signal: AbortSignal.timeout((options.timeout ?? DEFAULT_TIMEOUT_SECONDS) * 1000),
   });
-  logger.info(`HTTP Request: GET ${url} "HTTP/1.1 ${response.status} ${response.statusText}"`);
+  logger.debug(`HTTP Request: GET ${url} "HTTP/1.1 ${response.status} ${response.statusText}"`);
   return {
     status: response.status,
     ok: response.ok,

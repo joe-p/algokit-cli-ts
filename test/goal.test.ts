@@ -35,14 +35,15 @@ describe("goal", () => {
 
   it("passes arguments (including unknown options) through to goal", async () => {
     mockAlgodRunning();
-    procMock.setOutput(GOAL_PREFIX, ["line one", "line two"]);
+    procMock.setOutput(GOAL_PREFIX, ["  indented\tline one  \n", "line two\n"]);
 
     const result = await invoke("goal account list -w unencrypted-default-wallet", { cwd });
 
     expect(result.exitCode).toBe(0);
     expect(goalCall()?.command.slice(7)).toEqual(["account", "list", "-w", "unencrypted-default-wallet"]);
-    // goal output is logged at INFO level without a process prefix
-    expect(result.output).toContain("\n line one\n line two\n");
+    // goal output is passed through unchanged (not trimmed, prefixed or duplicated as a debug log line)
+    expect(result.output).toContain("'\n  indented\tline one  \nline two\n");
+    expect(result.output).not.toContain("docker: line two");
   });
 
   it("propagates goal's exit code", async () => {

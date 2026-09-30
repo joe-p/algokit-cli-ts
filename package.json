@@ -20,7 +20,6 @@
     "dev": "node --experimental-strip-types src/index.ts"
   },
   "dependencies": {
-    "@inquirer/select": "^5.2.5",
     "commander": "^15.0.0"
   },
   "devDependencies": {
