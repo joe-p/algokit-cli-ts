@@ -16,8 +16,8 @@ importers:
         specifier: ^26.6.3
         version: 26.6.4
       semfrag:
-        specifier: ^0.6.0
-        version: 0.6.0
+        specifier: ^0.9.0
+        version: 0.9.0
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
@@ -427,8 +427,8 @@ packages:
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
 
-  semfrag@0.6.0:
-    resolution: {integrity: sha512-GGnD1FUBHDqdiKDiEfhd4rRhKkINxwN26caOX6sXotiFlVezVsOBB4ZMN1mH1aqzswviGjpoePeZ18yrFdFvyg==}
+  semfrag@0.9.0:
+    resolution: {integrity: sha512-0BTeinQOX2Atqlji310hkBoOml3w/82FLoclBPrPyetVbHJFR4goD2Ol7OXTxCh2J4+8x6iJBy7s1C4ZUrhXyw==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -803,7 +803,7 @@ snapshots:
       '@rolldown/binding-win32-arm64-msvc': 1.2.12
       '@rolldown/binding-win32-x64-msvc': 1.2.12
 
-  semfrag@0.6.0: {}
+  semfrag@0.9.0: {}
 
   source-map-js@1.2.2: {}
 
