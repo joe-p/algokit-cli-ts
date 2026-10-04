@@ -1,5 +1,5 @@
 {
-  "name": "algokit-cli-ts",
+  "name": "@joe-p/algokit-cli",
   "version": "0.1.0",
   "description": "TypeScript port of the AlgoKit CLI (localnet and goal commands)",
   "license": "MIT",
@@ -19,11 +19,16 @@
     "test": "vitest run",
     "dev": "node --experimental-strip-types src/index.ts"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joe-p/algokit-cli-ts.git"
+  },
   "dependencies": {
     "commander": "^15.0.0"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",
+    "semfrag": "^0.6.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.2"
   }
